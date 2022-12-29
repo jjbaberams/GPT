@@ -1,0 +1,35 @@
+## Predict Future Stock Prices by using Past Data ##
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+
+# Load the stock data
+df = pd.read_csv('stock_data.csv')
+
+# Convert the date field to a datetime object
+df['date'] = pd.to_datetime(df['date'])
+
+# Set the date field as the index of the DataFrame
+df.set_index('date', inplace=True)
+
+# Split the data into training and test sets
+split_date = pd.Timestamp('01-01-2018')
+train = df.loc[:split_date]
+test = df.loc[split_date:]
+
+# Extract the feature and target columns
+X_train = train[['open', 'high', 'low', 'close', 'volume']]
+y_train = train['adj_close']
+X_test = test[['open', 'high', 'low', 'close', 'volume']]
+y_test = test['adj_close']
+
+# Train a random forest model on the training data
+model = RandomForestRegressor(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions on the test data
+predictions = model.predict(X_test)
+
+# Calculate the mean absolute error of the predictions
+mae = np.mean(np.abs(predictions - y_test))
+print('MAE:', mae)
